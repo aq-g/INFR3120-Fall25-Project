@@ -1,0 +1,21 @@
+{
+  "name": "infr3120-fall25-project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aq-g/INFR3120-Fall25-Project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/aq-g/INFR3120-Fall25-Project/issues"
+  },
+  "homepage": "https://github.com/aq-g/INFR3120-Fall25-Project#readme"
+}
