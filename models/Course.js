@@ -1,12 +1,40 @@
-const mongoose = require("mongoose");
 
-const courseSchema = new mongoose.Schema({
-  courseCode: { type: String, required: true },
-  courseName: { type: String, required: true },
-  instructorName: { type: String, required: true },
-  deliveryMode: { type: String, required: true },      // InPerson / Online / Hybrid
-  semesterOffered: { type: String, required: true },   // Semester 1 / Semester 2 / Both
-  description: { type: String }
-});
+function courseModel(db) {
+    const collection = db.collection("courses");
 
-module.exports = mongoose.model("Course", courseSchema);
+    return {
+
+        // create
+        addCourse: async (course) => {
+            return await collection.insertOne(course);
+        },
+
+        // read all
+        getAllCourses: async () => {
+            return await collection.find().toArray();
+        },
+
+        // read one
+        getCourseById: async (id) => {
+            const { ObjectId } = require("mongodb");
+            return await collection.findOne({ _id: new ObjectId(id) });
+        },
+
+        // update
+        updateCourse: async (id, updatedData) => {
+            const { ObjectId } = require("mongodb");
+            return await collection.updateOne(
+                { _id: new ObjectId(id) },
+                { $set: updatedData }
+            );
+        },
+
+        // delete
+        deleteCourse: async (id) => {
+            const { ObjectId } = require("mongodb");
+            return await collection.deleteOne({ _id: new ObjectId(id) });
+        }
+    };
+}
+
+module.exports = courseModel;
