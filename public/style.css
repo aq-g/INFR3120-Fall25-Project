@@ -1,0 +1,49 @@
+.imagecrop {
+    height: 120px;
+    width: 300px;
+    overflow: hidden;
+}
+
+.imagecrop img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+}
+
+h1 {
+    font-size: 7vw;
+    text-align: center;
+    margin-top: 8vw;
+    font-family: Helvetica, Arial, sans-serif;
+    color: #23afa4;
+}
+
+h2 {
+    font-size: 5vw;
+    text-align: center;
+    margin-top: 7vw;
+    font-family: Helvetica, Arial, sans-serif;
+}
+
+#courseTable {
+    width: 80%;
+    margin: 1vw auto;
+}
+
+.add-button {
+    margin-left: 10%;
+}
+
+#editCourseForm {
+    width: 80%;
+    margin: 1vw auto;
+}
+
+.back-link {
+    margin-left: 10%;
+}
+
+#addCourseForm {
+    width: 80%;
+    margin: 1vw auto;
+}
