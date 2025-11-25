@@ -49,6 +49,11 @@ passport.use(
     )
 );
 
+function ensureAuthenticated(req, res, next) {
+    if (req.isAuthenticated()) return next();
+    res.redirect("/login.html");
+}
+
 
 let db;
 let Course;
@@ -79,6 +84,36 @@ app.get("/test-db", async (req, res) => {
     }
 });
 
+app.get("/auth/github", passport.authenticate("github", { scope: ["user:email"] }));
+
+app.get(
+    "/auth/github/callback",
+    passport.authenticate("github", { failureRedirect: "/login.html" }),
+    (req, res) => {
+        res.redirect("/");
+    }
+);
+
+app.get("/logout", (req, res, next) => {
+    req.logout(err => {
+        if (err) return next(err);
+        req.session.destroy(() => res.redirect("/"));
+    });
+});
+
+// check authentication status for frontend
+app.get("/api/auth/status", (req, res) => {
+    if (req.isAuthenticated()) {
+        res.json({ 
+            isAuthenticated: true,
+            username: req.user.username || req.user.displayName
+        });
+    } else {
+        res.json({ isAuthenticated: false });
+    }
+});
+
+
 // read all
 app.get("/api/courses", async (req, res) => {
     try {
@@ -101,7 +136,7 @@ app.get("/api/courses/:id", async (req, res) => {
 });
 
 // create
-app.post("/add-course", async (req, res) => {
+app.post("/add-course", ensureAuthenticated, async (req, res) => {
     try {
         const newCourse = {
             code: req.body.code,
@@ -120,7 +155,7 @@ app.post("/add-course", async (req, res) => {
 });
 
 // update
-app.post("/edit-course", async (req, res) => {
+app.post("/edit-course", ensureAuthenticated, async (req, res) => {
     try {
         const id = req.body.id;
 
@@ -141,7 +176,7 @@ app.post("/edit-course", async (req, res) => {
 });
 
 // delete
-app.post("/delete-course/:id", async (req, res) => {
+app.post("/delete-course/:id", ensureAuthenticated, async (req, res) => {
     try {
         await Course.deleteCourse(req.params.id);
         res.redirect("/");

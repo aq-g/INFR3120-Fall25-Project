@@ -1,6 +1,26 @@
-document.addEventListener("DOMContentLoaded", () => {
+window.isUserAuthenticated = false;
+
+document.addEventListener("DOMContentLoaded", async () => {
     const courseTableBody = document.getElementById("courseTableBody");
     const editForm = document.getElementById("editCourseForm");
+
+    await checkAuthForDisplay();
+
+    if (window.location.pathname.endsWith('addcourse.html')) {
+        if (!window.isUserAuthenticated) {
+            alert('please login to add courses');
+            window.location.href = '/login.html';
+            return;
+        }
+    }
+
+    if (window.location.pathname.endsWith('editcourse.html')) {
+        if (!window.isUserAuthenticated) {
+            alert('please login to edit courses');
+            window.location.href = '/login.html';
+            return;
+        }
+    }
 
     if (courseTableBody) {
         loadCourses();
@@ -26,13 +46,7 @@ async function loadCourses() {
         courses.forEach(course => {
             const tr = document.createElement("tr");
 
-            tr.innerHTML = `
-                <td>${course.code || ""}</td>
-                <td>${course.name || ""}</td>
-                <td>${course.instructor || ""}</td>
-                <td>${course.delivery || ""}</td>
-                <td>${course.semester || ""}</td>
-                <td>${course.description || ""}</td>
+            const actionButtons = window.isUserAuthenticated ? `
                 <td>
                     <a href="editcourse.html?id=${course._id}" class="btn-small">edit</a>
                     <form action="/delete-course/${course._id}" method="POST" style="display:inline;">
@@ -41,12 +55,33 @@ async function loadCourses() {
                         </button>
                     </form>
                 </td>
+            ` : '';
+
+            tr.innerHTML = `
+                <td>${course.code || ""}</td>
+                <td>${course.name || ""}</td>
+                <td>${course.instructor || ""}</td>
+                <td>${course.delivery || ""}</td>
+                <td>${course.semester || ""}</td>
+                <td>${course.description || ""}</td>
+                ${actionButtons}
             `;
 
             tbody.appendChild(tr);
         });
     } catch (err) {
         console.error("error loading courses:", err);
+    }
+}
+
+async function checkAuthForDisplay() {
+    try {
+        const response = await fetch('/api/auth/status');
+        const data = await response.json();
+        window.isUserAuthenticated = data.isAuthenticated;
+    } catch (error) {
+        console.error('error checking auth:', error);
+        window.isUserAuthenticated = false;
     }
 }
 
