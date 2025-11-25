@@ -13,13 +13,15 @@
         <img src="images/logo.png" alt="Compass University Logo" class="logo" width="300" height="300">
     </div>
         <h1>Compass University</h1>
+
+    <nav id="mainNav"></nav>
 </header>
 
 <main>
 
     <section class="page-header">
         <h2>Course Catalogue</h2>
-        <a href="addcourse.html" class="add-button">+ Add a Course</a>
+        <a href="addcourse.html" id="addCourseBtn" class="add-button" style="display:none;">+ Add a Course</a>
     </section>
 
     <section class="course-list">
@@ -32,7 +34,7 @@
                     <th>Delivery</th>
                     <th>Semester</th>
                     <th>Description</th>
-                    <th>Actions</th>
+                    <th id="actionsHeader" style="display:none;">Actions</th>
                 </tr>
             </thead>
 
@@ -44,6 +46,7 @@
 
 </main>
 
+<script src="navigation.js"></script>
 <script src="script.js"></script>
 </body>
 </html>
