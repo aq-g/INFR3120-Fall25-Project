@@ -101,6 +101,19 @@ app.get("/logout", (req, res, next) => {
     });
 });
 
+// check authentication status for frontend
+app.get("/api/auth/status", (req, res) => {
+    if (req.isAuthenticated()) {
+        res.json({ 
+            isAuthenticated: true,
+            username: req.user.username || req.user.displayName
+        });
+    } else {
+        res.json({ isAuthenticated: false });
+    }
+});
+
+
 // read all
 app.get("/api/courses", async (req, res) => {
     try {
