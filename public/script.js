@@ -1,12 +1,77 @@
 window.isUserAuthenticated = false;
 
+// Form validation
+function validateCourseForm(formData) {
+    const errors = [];
+    
+    // course code: 4 letters + 4 digits (ex INFR3120)
+    const codePattern = /^[A-Z]{4}\d{4}$/;
+    if (!codePattern.test(formData.code.toUpperCase())) {
+        errors.push('Course code must be 4 letters + 4 numbers (Example: INFR3120)');
+    }
+    
+    // coursename length
+    if (formData.name.length < 3) {
+        errors.push('Course name must be at least 3 characters');
+    }
+    
+    // instructor name
+    if (formData.instructor.length < 2) {
+        errors.push('Please enter instructor name');
+    }
+    
+    // delivery mode
+    if (!formData.delivery) {
+        errors.push('Please select a delivery mode');
+    }
+    
+    // semester
+    if (!formData.semester) {
+        errors.push('Please select a semester');
+    }
+    
+    return errors;
+}
+
+function showMessage(message, type = 'info') {
+    const main = document.querySelector('main');
+    if (!main) {
+        alert(message); // fallback if no <main>
+        return;
+    }
+
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type}`;
+    alert.style.marginBottom = '20px';
+    alert.textContent = message;
+    
+    
+    const existingAlert = main.querySelector('.alert');
+    if (existingAlert) {
+        existingAlert.remove();
+    }
+    
+    main.insertBefore(alert, main.firstChild);
+    
+    // auto remove after 5 seconds
+    setTimeout(() => alert.remove(), 5000);
+}
+
+
+// Waits till loaded to run script
+
 document.addEventListener("DOMContentLoaded", async () => {
     const courseTableBody = document.getElementById("courseTableBody");
+    const addForm = document.getElementById("addCourseForm");
     const editForm = document.getElementById("editCourseForm");
 
+    // 1) Check auth status first
     await checkAuthForDisplay();
 
-    if (window.location.pathname.endsWith('addcourse.html')) {
+    // 2) protect add and edit pages
+    const path = window.location.pathname;
+
+    if (path.endsWith('addcourse.html')) {
         if (!window.isUserAuthenticated) {
             alert('please login to add courses');
             window.location.href = '/login.html';
@@ -14,7 +79,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
 
-    if (window.location.pathname.endsWith('editcourse.html')) {
+    if (path.endsWith('editcourse.html')) {
         if (!window.isUserAuthenticated) {
             alert('please login to edit courses');
             window.location.href = '/login.html';
@@ -22,14 +87,67 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
 
+    // 3) load table of courses if on list page
     if (courseTableBody) {
         loadCourses();
     }
 
-    if (editForm) {
+    // 4) If on edit pageload course data into form
+    if (editForm && path.endsWith('editcourse.html')) {
         initEditForm();
     }
+
+    // 5) Attach validation toadd form
+    if (addForm) {
+        addForm.addEventListener("submit", function (e) {
+            e.preventDefault(); // stop immediate submit
+
+            const formData = {
+                code: document.getElementById("code").value.trim(),
+                name: document.getElementById("name").value.trim(),
+                instructor: document.getElementById("instructor").value.trim(),
+                delivery: document.getElementById("delivery").value,
+                semester: document.getElementById("semester").value,
+                description: document.getElementById("description").value.trim()
+            };
+
+            const errors = validateCourseForm(formData);
+
+            if (errors.length > 0) {
+                showMessage(errors.join('. '), 'error');
+            } else {
+                showMessage('Saving course...', 'info');
+                this.submit(); // now actually submit
+            }
+        });
+    }
+
+    // 6) Attach validation to edit form
+    if (editForm) {
+        editForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const formData = {
+                code: document.getElementById("code").value.trim(),
+                name: document.getElementById("name").value.trim(),
+                instructor: document.getElementById("instructor").value.trim(),
+                delivery: document.getElementById("delivery").value,
+                semester: document.getElementById("semester").value,
+                description: document.getElementById("description").value.trim()
+            };
+
+            const errors = validateCourseForm(formData);
+
+            if (errors.length > 0) {
+                showMessage(errors.join('. '), 'error');
+            } else {
+                showMessage('Updating course...', 'info');
+                this.submit();
+            }
+        });
+    }
 });
+
 
 async function loadCourses() {
     try {
