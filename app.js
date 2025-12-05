@@ -7,7 +7,7 @@ require("dotenv").config();
 const passport = require("passport");
 const session = require("express-session");
 const GitHubStrategy = require("passport-github2").Strategy;
-
+const GoogleStrategy = require("passport-google-oauth20").Strategy; // google auth
 const createCourseModel = require("./models/Course");
 
 const app = express();
@@ -42,6 +42,19 @@ passport.use(
             clientID: process.env.GITHUB_CLIENT_ID,
             clientSecret: process.env.GITHUB_CLIENT_SECRET,
             callbackURL: "https://infr3120-fall25-project-f0mf.onrender.com/auth/github/callback",
+        },
+        (accessToken, refreshToken, profile, done) => {
+            return done(null, profile);
+        }
+    )
+);
+// Google Auth
+passport.use(
+    new GoogleStrategy(
+        {
+            clientID: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+            callbackURL: "https://infr3120-fall25-project-f0mf.onrender.com/auth/google/callback",
         },
         (accessToken, refreshToken, profile, done) => {
             return done(null, profile);
@@ -93,7 +106,16 @@ app.get(
         res.redirect("/");
     }
 );
+// google routes
+app.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 
+app.get(
+    "/auth/google/callback",
+    passport.authenticate("google", { failureRedirect: "/login.html" }),
+    (req, res) => {
+        res.redirect("/");
+    }
+);
 app.get("/logout", (req, res, next) => {
     req.logout(err => {
         if (err) return next(err);
