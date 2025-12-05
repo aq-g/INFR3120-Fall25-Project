@@ -4,21 +4,116 @@
     <meta charset="UTF-8">
     <title>Login | Compass University</title>
     <link rel="stylesheet" href="style.css">
+
+    <style>
+        /* Main login box */
+        .login-container {
+            max-width: 400px;
+            margin: 50px auto;
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .login-container h1 {
+            color: #23afa4;
+            margin-bottom: 10px;
+        }
+
+        .login-container p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        /* Base login button style */
+        .login-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+
+            width: 100%;
+            padding: 14px;
+            margin: 10px 0;
+
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+
+            color: white;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .login-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        /* Provider-specific colors */
+        .github-btn { background: #24292e; }
+        .google-btn { background: #4285F4; }
+        .discord-btn { background: #5865F2; }
+
+        /* Back button */
+        .cancel-btn {
+            background: #ffc107;
+            color: #333;
+            margin-top: 15px;
+        }
+
+        /* Divider line */
+        .divider {
+            height: 1px;
+            background: #ddd;
+            margin: 25px 0;
+        }
+
+        /* SVG icon styling */
+        .login-btn img {
+            height: 20px;
+            width: 20px;
+        }
+    </style>
 </head>
 
 <body>
 
-<main class="container">
-    <h1>Login</h1>
-    <p>Login using your GitHub account</p>
-    <a href="/auth/github" class="btn btn-success">
-        Login with GitHub
-    </a>
+<main>
+    <div class="login-container">
+        <h1>Login to Compass University</h1>
+        <p>Select a login method:</p>
 
-    <br><br>
-    <a href="/" class="btn btn-warning">Cancel</a>
+        <!-- GitHub Login Button -->
+        <a href="/auth/github" class="login-btn github-btn">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub">
+            Login with GitHub
+        </a>
 
+        <!-- Google Login Button -->
+        <a href="/auth/google" class="login-btn google-btn">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google">
+            Login with Google
+        </a>
 
+        <!-- Discord Login Button -->
+        <a href="/auth/discord" class="login-btn discord-btn">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/9/98/Discord_logo.svg" alt="Discord">
+            Login with Discord
+        </a>
+
+        <!-- Divider Line -->
+        <div class="divider"></div>
+
+        <!-- Back to home button -->
+        <a href="/" class="login-btn cancel-btn">
+            Back to Home
+        </a>
+    </div>
 </main>
 
 </body>

@@ -8,6 +8,7 @@ const passport = require("passport");
 const session = require("express-session");
 const GitHubStrategy = require("passport-github2").Strategy;
 const GoogleStrategy = require("passport-google-oauth20").Strategy; // google auth
+const DiscordStrategy = require("passport-discord").Strategy; //discord auth
 const createCourseModel = require("./models/Course");
 
 const app = express();
@@ -61,7 +62,20 @@ passport.use(
         }
     )
 );
-
+// Discord Auth
+passport.use(
+    new DiscordStrategy(
+        {
+            clientID: process.env.DISCORD_CLIENT_ID,
+            clientSecret: process.env.DISCORD_CLIENT_SECRET,
+            callbackURL: "https://infr3120-fall25-project-f0mf.onrender.com/auth/discord/callback",
+            scope: ['identify', 'email']
+        },
+        (accessToken, refreshToken, profile, done) => {
+            return done(null, profile);
+        }
+    )
+);
 function ensureAuthenticated(req, res, next) {
     if (req.isAuthenticated()) return next();
     res.redirect("/login.html");
@@ -112,6 +126,16 @@ app.get("/auth/google", passport.authenticate("google", { scope: ["profile", "em
 app.get(
     "/auth/google/callback",
     passport.authenticate("google", { failureRedirect: "/login.html" }),
+    (req, res) => {
+        res.redirect("/");
+    }
+);
+// Discord Routes
+app.get("/auth/discord", passport.authenticate("discord"));
+
+app.get(
+    "/auth/discord/callback",
+    passport.authenticate("discord", { failureRedirect: "/login.html" }),
     (req, res) => {
         res.redirect("/");
     }
