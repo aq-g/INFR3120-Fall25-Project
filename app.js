@@ -3,6 +3,7 @@ const path = require("path");
 const { MongoClient } = require("mongodb");
 const { ObjectId } = require("mongodb");
 require("dotenv").config();
+const multer = require("multer");
 
 const passport = require("passport");
 const session = require("express-session");
@@ -84,6 +85,7 @@ function ensureAuthenticated(req, res, next) {
 
 let db;
 let Course;
+let upload; // For file uploads
 
 async function connectToDB() {
     try {
@@ -97,6 +99,30 @@ async function connectToDB() {
     }
 }
 connectToDB();
+// MULTER FILE UPLOAD SETUP
+upload = multer({
+    storage: multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, 'public/uploads/profiles/'); // Where to save pictures
+        },
+        filename: function (req, file, cb) {
+            // Create unique filename: 
+            const uniqueName = 'user-' + Date.now() + path.extname(file.originalname);
+            cb(null, uniqueName);
+        }
+    }),
+    limits: { 
+        fileSize: 5 * 1024 * 1024 // Max 5MB
+    },
+    fileFilter: function (req, file, cb) {
+        // only allow images
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only image files are allowed!'));
+        }
+    }
+});
 
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "public", "index.html"));
@@ -140,6 +166,24 @@ app.get(
         res.redirect("/");
     }
 );
+// PROFILE PICTURE UPLOAD ROUTE
+app.post("/upload-profile-picture", ensureAuthenticated, upload.single('profilePic'), (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).send("No file uploaded");
+        }
+        
+        // Save picture path to user session
+        req.user.profilePicture = '/uploads/profiles/' + req.file.filename;
+        
+        // Redirect back to profile page
+        res.redirect("/profile.html");
+    } catch (error) {
+        console.error("Upload error:", error);
+        res.status(500).send("Error uploading picture");
+    }
+});
+
 app.get("/logout", (req, res, next) => {
     req.logout(err => {
         if (err) return next(err);
@@ -152,7 +196,8 @@ app.get("/api/auth/status", (req, res) => {
     if (req.isAuthenticated()) {
         res.json({ 
             isAuthenticated: true,
-            username: req.user.username || req.user.displayName
+            username: req.user.username || req.user.displayName,
+            profilePicture: req.user.profilePicture || '/images/default-avatar.png'
         });
     } else {
         res.json({ isAuthenticated: false });

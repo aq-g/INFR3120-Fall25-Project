@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Profile | Compass University</title>
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        /* Basic layout for profile page */
+        .profile-container {
+            max-width: 500px;
+            margin: 50px auto;
+            text-align: center;
+        }
+
+        /* Circular profile image */
+        .profile-pic {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: 4px solid #23afa4;
+            object-fit: cover;
+            margin: 20px auto;
+        }
+
+        .upload-form {
+            margin: 25px 0;
+        }
+
+        .upload-btn {
+            background: #23afa4;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .upload-btn:hover {
+            background: #1b8c80;
+        }
+
+        .back-link {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>My Profile</h1>
+        <nav id="mainNav"></nav>
+    </header>
+
+    <main>
+        <div class="profile-container">
+
+            <!-- User profile image -->
+            <img id="profilePic" src="/images/default-avatar.png" 
+                 class="profile-pic" alt="Profile Picture">
+
+            <!-- Username -->
+            <h2 id="username">Loading...</h2>
+
+            <!-- Upload form -->
+            <form action="/upload-profile-picture" method="POST" enctype="multipart/form-data" class="upload-form">
+                <p>Change Profile Picture:</p>
+                <input type="file" name="profilePic" accept="image/*" required>
+                <br><br>
+                <button type="submit" class="upload-btn">Upload Picture</button>
+            </form>
+
+            <!-- Back link -->
+            <div class="back-link">
+                <a href="index.html">← Back to Home</a>
+            </div>
+        </div>
+    </main>
+
+    <script src="navigation.js"></script>
+
+    <script>
+        // Gwr user info when the page loads
+        fetch('/api/auth/status')
+            .then(res => res.json())
+            .then(data => {
+                // If user is logged in, update profile info
+                if (data.isAuthenticated) {
+                    document.getElementById('username').textContent = data.username || "User";
+
+                    // Use saved profile pic if available, otherwise fallback image
+                    if (data.profilePicture) {
+                        document.getElementById('profilePic').src = data.profilePicture;
+                    }
+                } else {
+                    // If not logged in, redirect to login page
+                    window.location.href = '/login.html';
+                }
+            })
+            .catch(err => console.error("Error loading profile:", err));
+    </script>
+</body>
+</html>
