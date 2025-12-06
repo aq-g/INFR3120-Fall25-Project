@@ -3,6 +3,7 @@ const path = require("path");
 const { MongoClient } = require("mongodb");
 const { ObjectId } = require("mongodb");
 require("dotenv").config();
+const cors = require('cors');
 const multer = require("multer");
 
 const passport = require("passport");
@@ -197,7 +198,7 @@ app.get("/api/auth/status", (req, res) => {
         res.json({ 
             isAuthenticated: true,
             username: req.user.username || req.user.displayName,
-            profilePicture: req.user.profilePicture || '/images/default-avatar.png'
+            profilePicture: req.user.profilePicture || '/images/default-avatar.svg'
         });
     } else {
         res.json({ isAuthenticated: false });
