@@ -198,7 +198,7 @@ app.get("/api/auth/status", (req, res) => {
         res.json({ 
             isAuthenticated: true,
             username: req.user.username || req.user.displayName,
-            profilePicture: req.user.profilePicture || '/images/default-avatar.svg'
+            profilePicture: req.user.profilePicture || '/images/default-avatar.'
         });
     } else {
         res.json({ isAuthenticated: false });
