@@ -3,14 +3,13 @@ const path = require("path");
 const { MongoClient } = require("mongodb");
 const { ObjectId } = require("mongodb");
 require("dotenv").config();
-const cors = require('cors');
 const multer = require("multer");
 
 const passport = require("passport");
 const session = require("express-session");
 const GitHubStrategy = require("passport-github2").Strategy;
-const GoogleStrategy = require("passport-google-oauth20").Strategy; // google auth
-const DiscordStrategy = require("passport-discord").Strategy; //discord auth
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const DiscordStrategy = require("passport-discord").Strategy;
 const createCourseModel = require("./models/Course");
 
 const app = express();
@@ -18,7 +17,6 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
-
 
 app.use(
     session({
@@ -39,38 +37,47 @@ passport.deserializeUser((obj, done) => {
     done(null, obj);
 });
 
+// automatically uses localhost or Render
+const BASE_URL = process.env.NODE_ENV === 'production' 
+    ? 'https://infr3120-fall25-project-f0mf.onrender.com'
+    : 'http://localhost:3000';
+
+console.log('Using BASE_URL:', BASE_URL); // Debug line
+
 passport.use(
     new GitHubStrategy(
         {
             clientID: process.env.GITHUB_CLIENT_ID,
             clientSecret: process.env.GITHUB_CLIENT_SECRET,
-            callbackURL: "https://infr3120-fall25-project-f0mf.onrender.com/auth/github/callback",
+            callbackURL: `${BASE_URL}/auth/github/callback`,
         },
         (accessToken, refreshToken, profile, done) => {
             return done(null, profile);
         }
     )
 );
+
 // Google Auth
 passport.use(
     new GoogleStrategy(
         {
             clientID: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-            callbackURL: "https://infr3120-fall25-project-f0mf.onrender.com/auth/google/callback",
+            callbackURL: `${BASE_URL}/auth/google/callback`,
         },
         (accessToken, refreshToken, profile, done) => {
             return done(null, profile);
         }
     )
 );
+
 // Discord Auth
 passport.use(
     new DiscordStrategy(
         {
             clientID: process.env.DISCORD_CLIENT_ID,
             clientSecret: process.env.DISCORD_CLIENT_SECRET,
-            callbackURL: "https://infr3120-fall25-project-f0mf.onrender.com/auth/discord/callback",
+            callbackURL: `${BASE_URL}/auth/discord/callback`,
             scope: ['identify', 'email']
         },
         (accessToken, refreshToken, profile, done) => {
@@ -78,15 +85,15 @@ passport.use(
         }
     )
 );
+
 function ensureAuthenticated(req, res, next) {
     if (req.isAuthenticated()) return next();
     res.redirect("/login.html");
 }
 
-
 let db;
 let Course;
-let upload; // For file uploads
+let upload;
 
 async function connectToDB() {
     try {
@@ -100,23 +107,22 @@ async function connectToDB() {
     }
 }
 connectToDB();
+
 // MULTER FILE UPLOAD SETUP
 upload = multer({
     storage: multer.diskStorage({
         destination: function (req, file, cb) {
-            cb(null, 'public/uploads/profiles/'); // Where to save pictures
+            cb(null, 'public/uploads/profiles/');
         },
         filename: function (req, file, cb) {
-            // Create unique filename: 
             const uniqueName = 'user-' + Date.now() + path.extname(file.originalname);
             cb(null, uniqueName);
         }
     }),
     limits: { 
-        fileSize: 5 * 1024 * 1024 // Max 5MB
+        fileSize: 5 * 1024 * 1024
     },
     fileFilter: function (req, file, cb) {
-        // only allow images
         if (file.mimetype.startsWith('image/')) {
             cb(null, true);
         } else {
@@ -147,7 +153,7 @@ app.get(
         res.redirect("/");
     }
 );
-// google routes
+
 app.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 
 app.get(
@@ -157,7 +163,7 @@ app.get(
         res.redirect("/");
     }
 );
-// Discord Routes
+
 app.get("/auth/discord", passport.authenticate("discord"));
 
 app.get(
@@ -167,6 +173,7 @@ app.get(
         res.redirect("/");
     }
 );
+
 // PROFILE PICTURE UPLOAD ROUTE
 app.post("/upload-profile-picture", ensureAuthenticated, upload.single('profilePic'), (req, res) => {
     try {
@@ -174,10 +181,10 @@ app.post("/upload-profile-picture", ensureAuthenticated, upload.single('profileP
             return res.status(400).send("No file uploaded");
         }
         
-        // Save picture path to user session
         req.user.profilePicture = '/uploads/profiles/' + req.file.filename;
         
-        // Redirect back to profile page
+        console.log('Picture uploaded:', req.file.filename); // Debug line
+        
         res.redirect("/profile.html");
     } catch (error) {
         console.error("Upload error:", error);
@@ -198,13 +205,12 @@ app.get("/api/auth/status", (req, res) => {
         res.json({ 
             isAuthenticated: true,
             username: req.user.username || req.user.displayName,
-            profilePicture: req.user.profilePicture || '/images/default-avatar.'
+            profilePicture: req.user.profilePicture || '/images/default-avatar.svg'
         });
     } else {
         res.json({ isAuthenticated: false });
     }
 });
-
 
 // read all
 app.get("/api/courses", async (req, res) => {
@@ -277,7 +283,6 @@ app.post("/delete-course/:id", ensureAuthenticated, async (req, res) => {
         res.status(500).send("error deleting course");
     }
 });
-
 
 app.listen(PORT, () => {
     console.log(`server running at http://localhost:${PORT}`);
