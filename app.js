@@ -42,7 +42,7 @@ const BASE_URL = process.env.NODE_ENV === 'production'
     ? 'https://infr3120-fall25-project-f0mf.onrender.com'
     : 'http://localhost:3000';
 
-console.log('Using BASE_URL:', BASE_URL); // Debug line
+console.log('Using BASE_URL:', BASE_URL); 
 
 passport.use(
     new GitHubStrategy(
